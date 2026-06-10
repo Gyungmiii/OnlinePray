@@ -298,8 +298,40 @@ h2 {
   transition: height 260ms ease, filter 260ms ease;
 }
 
+.water::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.46);
+  border-radius: 50%;
+  content: "";
+  transform: translateY(-5px);
+}
+
+.glass.water-fresh .water {
+  filter: saturate(1.16) brightness(1.04);
+}
+
+.glass.water-cooling .water {
+  filter: hue-rotate(10deg) saturate(0.94);
+}
+
+.glass.water-old .water {
+  filter: hue-rotate(22deg) saturate(0.78) brightness(0.95);
+}
+
+.glass.water-low .water {
+  filter: hue-rotate(34deg) saturate(0.68) brightness(0.9);
+}
+
 .glass.pour {
   animation: bounce 760ms ease;
+}
+
+.water-panel.prayer-flash .glass {
+  box-shadow: 0 0 0 8px rgba(255, 209, 102, 0.18), 0 0 32px rgba(54, 199, 216, 0.38);
 }
 
 .sparkle {
@@ -332,6 +364,19 @@ h2 {
 
 .status-stack {
   min-width: 0;
+}
+
+.water-readout {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.water-readout strong {
+  color: var(--ink);
+  font-size: 17px;
 }
 
 .status-pill,
@@ -420,10 +465,11 @@ h2 {
 }
 
 .ritual-stage {
-  display: flex;
+  display: grid;
+  grid-template-columns: 118px minmax(0, 1fr);
   align-items: center;
-  gap: 14px;
-  min-height: 92px;
+  gap: 16px;
+  min-height: 146px;
   margin: 16px 0;
   padding: 14px;
   background: #fff8e4;
@@ -431,13 +477,19 @@ h2 {
   border-radius: 8px;
 }
 
-.ritual-stage.active .ritual-icon {
+.ritual-stage.active .ritual-icon,
+.ritual-stage.prayer-flash .ritual-icon {
   animation: spin-pop 900ms ease;
+}
+
+.ritual-copy {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
 }
 
 .ritual-icon {
   display: grid;
-  flex: 0 0 52px;
   width: 52px;
   height: 52px;
   place-items: center;
@@ -452,9 +504,188 @@ h2 {
   line-height: 1.45;
 }
 
+.ritual-visual {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(245, 222, 161, 0.9);
+  border-radius: 8px;
+}
+
+.ritual-aura,
+.bell-wave,
+.smoke,
+.incense-stick,
+.incense-ember,
+.chant-token,
+.talisman-card,
+.bell-body {
+  position: absolute;
+}
+
+.ritual-aura {
+  inset: 24px;
+  background: rgba(255, 209, 102, 0.22);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.ritual-stage.prayer-flash .ritual-aura {
+  animation: aura-pulse 820ms ease;
+}
+
+.incense-stick,
+.incense-ember,
+.smoke,
+.chant-token,
+.talisman-card,
+.bell-body,
+.bell-wave {
+  opacity: 0;
+}
+
+.ritual-stage[data-ritual="incense"] .incense-stick,
+.ritual-stage[data-ritual="incense"] .incense-ember,
+.ritual-stage[data-ritual="incense"] .smoke,
+.ritual-stage[data-ritual="chant"] .chant-token,
+.ritual-stage[data-ritual="talisman"] .talisman-card,
+.ritual-stage[data-ritual="bell"] .bell-body,
+.ritual-stage[data-ritual="bell"] .bell-wave {
+  opacity: 1;
+}
+
+.incense-stick {
+  left: 53px;
+  bottom: 20px;
+  width: 7px;
+  height: 62px;
+  background: linear-gradient(#3e3128, #9b6848);
+  border-radius: 99px;
+  transform: rotate(-14deg);
+  transform-origin: bottom center;
+}
+
+.incense-ember {
+  top: 28px;
+  left: 42px;
+  width: 14px;
+  height: 14px;
+  background: var(--coral);
+  border-radius: 50%;
+  box-shadow: 0 0 16px rgba(255, 107, 87, 0.9);
+}
+
+.smoke {
+  left: 39px;
+  width: 18px;
+  height: 36px;
+  border-left: 3px solid rgba(99, 112, 128, 0.34);
+  border-radius: 50%;
+}
+
+.smoke-one {
+  top: 2px;
+}
+
+.smoke-two {
+  top: 12px;
+  left: 54px;
+}
+
+.ritual-stage.active[data-ritual="incense"] .incense-stick {
+  animation: plant-incense 900ms ease;
+}
+
+.ritual-stage.active[data-ritual="incense"] .incense-ember {
+  animation: ember-light 1200ms ease;
+}
+
+.ritual-stage.active[data-ritual="incense"] .smoke {
+  animation: smoke-rise 1800ms ease;
+}
+
+.chant-token {
+  color: var(--cyan-dark);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.chant-one {
+  bottom: 30px;
+  left: 16px;
+}
+
+.chant-two {
+  right: 14px;
+  bottom: 46px;
+}
+
+.chant-three {
+  top: 22px;
+  left: 31px;
+}
+
+.ritual-stage.active[data-ritual="chant"] .chant-token {
+  animation: chant-float 900ms ease;
+}
+
+.talisman-card {
+  top: 22px;
+  left: 34px;
+  display: grid;
+  width: 44px;
+  height: 68px;
+  place-items: center;
+  color: #8a5c00;
+  background: var(--gold);
+  border: 2px solid #e4af35;
+  border-radius: 4px;
+  font-size: 28px;
+  font-weight: 900;
+  box-shadow: 0 12px 26px rgba(255, 209, 102, 0.34);
+}
+
+.ritual-stage.active[data-ritual="talisman"] .talisman-card {
+  animation: talisman-rise 950ms ease;
+}
+
+.bell-body {
+  top: 28px;
+  left: 31px;
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  color: white;
+  background: var(--coral);
+  border-radius: 26px 26px 14px 14px;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.bell-wave {
+  inset: 26px;
+  border: 2px solid rgba(255, 107, 87, 0.38);
+  border-radius: 50%;
+}
+
+.ritual-stage.active[data-ritual="bell"] .bell-body {
+  animation: bell-ring 760ms ease;
+}
+
+.ritual-stage.active[data-ritual="bell"] .bell-wave {
+  animation: wave-out 900ms ease;
+}
+
+.bell-wave-two {
+  animation-delay: 120ms;
+}
+
 .chat-log {
   position: relative;
-  height: 300px;
+  height: 230px;
   overflow: auto;
   padding: 10px;
   background: #f7fafb;
@@ -596,6 +827,105 @@ h2 {
   }
 }
 
+@keyframes aura-pulse {
+  0% {
+    transform: scale(0.45);
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+@keyframes plant-incense {
+  0% {
+    transform: translateY(-18px) rotate(-38deg);
+  }
+  55% {
+    transform: translateY(0) rotate(-14deg);
+  }
+}
+
+@keyframes ember-light {
+  0%,
+  22% {
+    transform: scale(0.25);
+    opacity: 0;
+  }
+  46% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+}
+
+@keyframes smoke-rise {
+  0% {
+    transform: translateY(16px) scale(0.6);
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-20px) scale(1.15);
+    opacity: 0;
+  }
+}
+
+@keyframes chant-float {
+  0% {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-20px);
+    opacity: 0.25;
+  }
+}
+
+@keyframes talisman-rise {
+  0% {
+    transform: translateY(22px) scale(0.84);
+  }
+  55% {
+    transform: translateY(-8px) scale(1.05);
+  }
+}
+
+@keyframes bell-ring {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  24% {
+    transform: rotate(-10deg);
+  }
+  48% {
+    transform: rotate(9deg);
+  }
+  72% {
+    transform: rotate(-5deg);
+  }
+}
+
+@keyframes wave-out {
+  0% {
+    transform: scale(0.45);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
 @media (max-width: 860px) {
   .site-header {
     align-items: flex-start;
@@ -633,11 +963,13 @@ h2 {
 
   .water-stage,
   .chat-form,
-  .ritual-grid {
+  .ritual-grid,
+  .ritual-stage {
     grid-template-columns: 1fr;
   }
 
-  .glass {
+  .glass,
+  .ritual-visual {
     justify-self: center;
   }
 

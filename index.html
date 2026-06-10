@@ -76,6 +76,10 @@
             </div>
             <div class="status-stack">
               <span class="status-pill" id="prayer-state">기도 대기 중</span>
+              <div class="water-readout" aria-live="polite">
+                <strong id="water-age-status">방금 올린 맑은 물</strong>
+                <span id="water-level-status">수위 안정</span>
+              </div>
               <p class="wish" id="wish-text"></p>
             </div>
           </div>
@@ -119,9 +123,25 @@
             </button>
           </div>
 
-          <div class="ritual-stage" id="ritual-stage" aria-live="polite">
-            <span class="ritual-icon" id="ritual-icon">향</span>
-            <p id="ritual-message">선택한 의식으로 빌드 캐시의 평안을 빕니다.</p>
+          <div class="ritual-stage" id="ritual-stage" data-ritual="incense" aria-live="polite">
+            <div class="ritual-visual" aria-hidden="true">
+              <span class="ritual-aura"></span>
+              <span class="incense-stick"></span>
+              <span class="incense-ember"></span>
+              <span class="smoke smoke-one"></span>
+              <span class="smoke smoke-two"></span>
+              <span class="chant-token chant-one">{ }</span>
+              <span class="chant-token chant-two">build</span>
+              <span class="chant-token chant-three">green</span>
+              <span class="talisman-card">符</span>
+              <span class="bell-body">딩</span>
+              <span class="bell-wave bell-wave-one"></span>
+              <span class="bell-wave bell-wave-two"></span>
+            </div>
+            <div class="ritual-copy">
+              <span class="ritual-icon" id="ritual-icon">향</span>
+              <p id="ritual-message">선택한 의식으로 빌드 캐시의 평안을 빕니다.</p>
+            </div>
           </div>
 
           <button class="button secondary wide" type="button" id="run-ritual">

@@ -64,6 +64,7 @@ const seedMessages = [
 let waterCooldownUntil = 0;
 let ritualCooldownUntil = 0;
 let chatCooldownUntil = 0;
+let waterOfferedAt = Date.now();
 let recentWishIndexes = [];
 let selectedRitual = localStorage.getItem(STORAGE_KEYS.lastRitual) || "incense";
 let messages = [];
@@ -78,6 +79,9 @@ const waterCooldownText = $("#water-cooldown-text");
 const waterProgress = $("#water-progress");
 const waterFill = $("#water-fill");
 const glass = $("#glass");
+const waterPanel = $("#water");
+const waterAgeStatus = $("#water-age-status");
+const waterLevelStatus = $("#water-level-status");
 const wishText = $("#wish-text");
 const prayerState = $("#prayer-state");
 const ritualButtons = Array.from(document.querySelectorAll(".ritual"));
@@ -142,6 +146,77 @@ function playTone(frequency = 660, duration = 0.08) {
   oscillator.stop(context.currentTime + duration);
 }
 
+function lerp(start, end, amount) {
+  return start + (end - start) * amount;
+}
+
+function getWaterState(elapsed) {
+  const checkpoints = [
+    { time: 0, level: 82 },
+    { time: 30000, level: 72 },
+    { time: 180000, level: 58 },
+    { time: 600000, level: 44 },
+    { time: 1800000, level: 34 },
+  ];
+
+  for (let index = 1; index < checkpoints.length; index += 1) {
+    const previous = checkpoints[index - 1];
+    const next = checkpoints[index];
+    if (elapsed <= next.time) {
+      const amount = (elapsed - previous.time) / (next.time - previous.time);
+      return lerp(previous.level, next.level, amount);
+    }
+  }
+
+  const afterThirtyMinutes = elapsed - checkpoints[checkpoints.length - 1].time;
+  return Math.max(28, 34 - (afterThirtyMinutes / 1800000) * 6);
+}
+
+function updateWaterState() {
+  const elapsed = Date.now() - waterOfferedAt;
+  const level = getWaterState(elapsed);
+  let stateClass = "water-fresh";
+  let ageText = "방금 올린 맑은 물";
+  let levelText = "초반 증발이 살짝 보입니다.";
+
+  if (elapsed >= 1800000) {
+    stateClass = "water-low";
+    ageText = "많이 줄어든 물";
+    levelText = "천천히 낮아지는 중입니다.";
+  } else if (elapsed >= 600000) {
+    stateClass = "water-old";
+    ageText = "오래된 물";
+    levelText = "수위가 낮아졌습니다.";
+  } else if (elapsed >= 180000) {
+    stateClass = "water-old";
+    ageText = "조금 오래된 물";
+    levelText = "이제 천천히 줄어듭니다.";
+  } else if (elapsed >= 30000) {
+    stateClass = "water-cooling";
+    ageText = "조금 식은 물";
+    levelText = "초반보다 완만하게 줄어듭니다.";
+  }
+
+  waterFill.style.height = `${level}%`;
+  glass.classList.remove("water-fresh", "water-cooling", "water-old", "water-low");
+  glass.classList.add(stateClass);
+  waterAgeStatus.textContent = ageText;
+  waterLevelStatus.textContent = levelText;
+}
+
+function flashPrayerStage() {
+  waterPanel.classList.remove("prayer-flash");
+  ritualStage.classList.remove("prayer-flash");
+  void waterPanel.offsetWidth;
+  waterPanel.classList.add("prayer-flash");
+  ritualStage.classList.add("prayer-flash");
+
+  window.setTimeout(() => {
+    waterPanel.classList.remove("prayer-flash");
+    ritualStage.classList.remove("prayer-flash");
+  }, 900);
+}
+
 function startWaterRitual() {
   const now = Date.now();
   if (now < waterCooldownUntil) {
@@ -149,13 +224,14 @@ function startWaterRitual() {
   }
 
   waterCooldownUntil = now + 8000;
-  waterFill.style.height = `${58 + Math.floor(Math.random() * 27)}%`;
-  waterFill.style.filter = `hue-rotate(${Math.floor(Math.random() * 22)}deg)`;
+  waterOfferedAt = now;
+  updateWaterState();
   glass.classList.remove("pour");
   void glass.offsetWidth;
   glass.classList.add("pour");
   prayerState.textContent = "기도 진행 중";
   pickWish();
+  flashPrayerStage();
   playTone(720, 0.09);
 
   window.setTimeout(() => {
@@ -174,6 +250,7 @@ function selectRitual(key) {
   });
 
   ritualIcon.textContent = ritualData[key].icon;
+  ritualStage.dataset.ritual = key;
 }
 
 function runRitual() {
@@ -186,6 +263,7 @@ function runRitual() {
   const data = ritualData[selectedRitual];
   ritualIcon.textContent = data.icon;
   ritualMessage.textContent = randomItem(data.messages);
+  ritualStage.dataset.ritual = selectedRitual;
   ritualStage.classList.remove("active");
   void ritualStage.offsetWidth;
   ritualStage.classList.add("active");
@@ -299,6 +377,7 @@ function sendChat(event) {
   addMessage(getNickname(), value, true);
   chatInput.value = "";
   chatNote.textContent = "기도 접수 완료. 빌드 로그를 지켜봅니다.";
+  flashPrayerStage();
   playTone(840, 0.07);
 }
 
@@ -320,6 +399,8 @@ function updateCooldowns() {
   if (chatLeft > 0) {
     chatNote.textContent = `${Math.ceil(chatLeft / 1000)}초 뒤 다음 메시지를 보낼 수 있습니다.`;
   }
+
+  updateWaterState();
 }
 
 function setupOnboarding() {
